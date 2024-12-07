@@ -107,13 +107,10 @@
     .scoreboard {
       margin-top: 20px;
       font-size: 18px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
     }
 
-    .score {
-      font-weight: bold;
+    .scoreboard span {
+      margin: 0 15px;
     }
 
     @media (max-width: 600px) {
@@ -128,9 +125,10 @@
   <div class="board" id="board"></div>
   <div class="message" id="message"></div>
   <button class="reset-btn" id="reset">Reset Game</button>
-  <div class="scoreboard">
-    <div>Player Wins: <span class="score" id="playerWins">0</span></div>
-    <div>AI Wins: <span class="score" id="aiWins">0</span></div>
+
+  <div class="scoreboard" id="scoreboard">
+    <span>Player X: <span id="playerScore">0</span></span>
+    <span>AI O: <span id="aiScore">0</span></span>
   </div>
 
   <script>
@@ -142,8 +140,8 @@
 
     let currentPlayer = "X";
     let isGameOver = false;
-    let playerWins = 0;
-    let aiWins = 0;
+    let playerScore = 0;
+    let aiScore = 0;
 
     function renderBoard() {
       const boardElement = document.getElementById("board");
@@ -174,12 +172,8 @@
         const winDetails = checkWinner();
         document.getElementById("message").textContent = `${currentPlayer} wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
+        updateScore(currentPlayer);
         isGameOver = true;
-
-        if (currentPlayer === "X") {
-          playerWins++;
-          document.getElementById("playerWins").textContent = playerWins;
-        }
         return;
       } else if (isDraw()) {
         document.getElementById("message").textContent = "It's a draw!";
@@ -208,9 +202,8 @@
         const winDetails = checkWinner();
         document.getElementById("message").textContent = `O wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
+        updateScore("O");
         isGameOver = true;
-        aiWins++;
-        document.getElementById("aiWins").textContent = aiWins;
       } else if (isDraw()) {
         document.getElementById("message").textContent = "It's a draw!";
         isGameOver = true;
@@ -249,3 +242,33 @@
         boardElement[index].classList.add("highlight");
         boardElement[index].querySelector(".arrow").classList.add(direction);
       });
+    }
+
+    function updateScore(winner) {
+      if (winner === "X") {
+        playerScore++;
+        document.getElementById("playerScore").textContent = playerScore;
+      } else if (winner === "O") {
+        aiScore++;
+        document.getElementById("aiScore").textContent = aiScore;
+      }
+    }
+
+    function resetGame() {
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          board[i][j] = "";
+        }
+      }
+      currentPlayer = "X";
+      isGameOver = false;
+      document.getElementById("message").textContent = "";
+      renderBoard();
+    }
+
+    document.getElementById("reset").addEventListener("click", resetGame);
+
+    renderBoard();
+  </script>
+</body>
+</html>
