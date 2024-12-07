@@ -25,6 +25,23 @@
       margin-top: 20px;
     }
 
+    .scoreboard {
+      display: flex;
+      justify-content: space-around;
+      width: 90%;
+      max-width: 400px;
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .scoreboard div {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
     .board {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -123,6 +140,10 @@
 </head>
 <body>
   <h1>Tic Tac Toe</h1>
+  <div class="scoreboard">
+    <div id="player-x-score">Player X: 0</div>
+    <div id="player-o-score">Player O: 0</div>
+  </div>
   <div class="board" id="board"></div>
   <div class="message" id="message"></div>
   <button class="reset-btn" id="reset">Reset Game</button>
@@ -136,6 +157,15 @@
 
     let currentPlayer = "X";
     let isGameOver = false;
+
+    // Track scores
+    let playerXScore = 0;
+    let playerOScore = 0;
+
+    function updateScoreboard() {
+      document.getElementById("player-x-score").textContent = `Player X: ${playerXScore}`;
+      document.getElementById("player-o-score").textContent = `Player O: ${playerOScore}`;
+    }
 
     function renderBoard() {
       const boardElement = document.getElementById("board");
@@ -167,6 +197,12 @@
         document.getElementById("message").textContent = `${currentPlayer} wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
         isGameOver = true;
+
+        // Update scores
+        if (currentPlayer === "X") playerXScore++;
+        else playerOScore++;
+
+        updateScoreboard();
         return;
       } else if (isDraw()) {
         document.getElementById("message").textContent = "It's a draw!";
@@ -196,6 +232,10 @@
         document.getElementById("message").textContent = `O wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
         isGameOver = true;
+
+        // Update scores
+        playerOScore++;
+        updateScoreboard();
       } else if (isDraw()) {
         document.getElementById("message").textContent = "It's a draw!";
         isGameOver = true;
@@ -245,12 +285,4 @@
       currentPlayer = "X";
       isGameOver = false;
       document.getElementById("message").textContent = "";
-      renderBoard();
-    }
-
-    document.getElementById("reset").addEventListener("click", resetGame);
-
-    renderBoard();
-  </script>
-</body>
-</html>
+      render
