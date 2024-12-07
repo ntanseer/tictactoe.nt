@@ -36,6 +36,7 @@
       border: 2px solid black;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      position: relative;
     }
 
     .cell.disabled {
@@ -47,13 +48,53 @@
       background-color: #eaeaea;
     }
 
+    .cell .arrow {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: transparent;
+      border: 2px solid blue;
+      transform-origin: center;
+      display: none;
+    }
+
+    .cell.highlight .arrow {
+      display: block;
+    }
+
+    .arrow.horizontal {
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+    }
+
+    .arrow.vertical {
+      left: 50%;
+      top: 10%;
+      bottom: 10%;
+      width: 2px;
+    }
+
+    .arrow.diagonal-lr {
+      width: 100%;
+      height: 2px;
+      transform: rotate(45deg);
+      top: 50%;
+      left: 0;
+    }
+
+    .arrow.diagonal-rl {
+      width: 100%;
+      height: 2px;
+      transform: rotate(-45deg);
+      top: 50%;
+      left: 0;
+    }
+
     .message {
       margin-top: 20px;
       font-size: 18px;
-    }
-
-    .highlight {
-      background-color: #aaf;
     }
 
     .reset-btn {
@@ -99,6 +140,9 @@
           }
           cellElement.textContent = cell;
           cellElement.addEventListener("click", () => handleMove(rowIndex, colIndex));
+          const arrow = document.createElement("div");
+          arrow.classList.add("arrow");
+          cellElement.appendChild(arrow);
           boardElement.appendChild(cellElement);
         });
       });
@@ -109,8 +153,9 @@
 
       board[row][col] = currentPlayer;
       if (checkWinner()) {
-        document.getElementById("message").textContent = `${currentPlayer} wins (${checkWinner()})!`;
-        highlightWinningCells(checkWinnerCells());
+        const winDetails = checkWinner();
+        document.getElementById("message").textContent = `${currentPlayer} wins!`;
+        highlightWinningCells(winDetails.cells, winDetails.direction);
         isGameOver = true;
         return;
       } else if (isDraw()) {
@@ -120,54 +165,55 @@
       }
 
       currentPlayer = currentPlayer === "X" ? "O" : "X";
+      if (currentPlayer === "O") makeAIMove();
       renderBoard();
+    }
+
+    function makeAIMove() {
+      let emptyCells = [];
+      board.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+          if (cell === "") emptyCells.push([rowIndex, colIndex]);
+        });
+      });
+      const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      board[row][col] = "O";
+      if (checkWinner()) {
+        const winDetails = checkWinner();
+        document.getElementById("message").textContent = `O wins!`;
+        highlightWinningCells(winDetails.cells, winDetails.direction);
+        isGameOver = true;
+      }
     }
 
     function checkWinner() {
       for (let i = 0; i < 3; i++) {
         if (board[i][0] && board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
-          return "Horizontal";
+          return { cells: [[i, 0], [i, 1], [i, 2]], direction: "horizontal" };
         }
         if (board[0][i] && board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
-          return "Vertical";
+          return { cells: [[0, i], [1, i], [2, i]], direction: "vertical" };
         }
       }
       if (board[0][0] && board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
-        return "Diagonal (\\)";
+        return { cells: [[0, 0], [1, 1], [2, 2]], direction: "diagonal-lr" };
       }
       if (board[0][2] && board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
-        return "Diagonal (/";
+        return { cells: [[0, 2], [1, 1], [2, 0]], direction: "diagonal-rl" };
       }
       return null;
-    }
-
-    function checkWinnerCells() {
-      for (let i = 0; i < 3; i++) {
-        if (board[i][0] && board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
-          return [[i, 0], [i, 1], [i, 2]];
-        }
-        if (board[0][i] && board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
-          return [[0, i], [1, i], [2, i]];
-        }
-      }
-      if (board[0][0] && board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
-        return [[0, 0], [1, 1], [2, 2]];
-      }
-      if (board[0][2] && board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
-        return [[0, 2], [1, 1], [2, 0]];
-      }
-      return [];
     }
 
     function isDraw() {
       return board.flat().every((cell) => cell !== "");
     }
 
-    function highlightWinningCells(cells) {
+    function highlightWinningCells(cells, direction) {
       const boardElement = document.getElementById("board").children;
       cells.forEach(([row, col]) => {
         const index = row * 3 + col;
         boardElement[index].classList.add("highlight");
+        boardElement[index].querySelector(".arrow").classList.add(direction);
       });
     }
 
