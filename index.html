@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic Tac Toe</title>
   <style>
+    /* Apply Google Fonts for a better title font */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+
     body {
       font-family: Arial, sans-serif;
       text-align: center;
@@ -13,6 +16,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      background-color: #ADD8E6; /* Light Blue background */
+    }
+
+    h1 {
+      font-family: 'Roboto', sans-serif; /* New font */
+      color: navy; /* Navy blue color */
+      margin-top: 20px;
     }
 
     .board {
@@ -33,7 +43,7 @@
       justify-content: center;
       font-size: 24px;
       font-weight: bold;
-      border: 2px solid black;
+      border: 4px solid black; /* Thicker borders */
       cursor: pointer;
       transition: background-color 0.3s ease;
       position: relative;
@@ -104,15 +114,6 @@
       cursor: pointer;
     }
 
-    .scoreboard {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-
-    .scoreboard span {
-      margin: 0 15px;
-    }
-
     @media (max-width: 600px) {
       .cell {
         font-size: 20px;
@@ -126,11 +127,6 @@
   <div class="message" id="message"></div>
   <button class="reset-btn" id="reset">Reset Game</button>
 
-  <div class="scoreboard" id="scoreboard">
-    <span>Player X: <span id="playerScore">0</span></span>
-    <span>AI O: <span id="aiScore">0</span></span>
-  </div>
-
   <script>
     const board = [
       ["", "", ""],
@@ -140,8 +136,6 @@
 
     let currentPlayer = "X";
     let isGameOver = false;
-    let playerScore = 0;
-    let aiScore = 0;
 
     function renderBoard() {
       const boardElement = document.getElementById("board");
@@ -172,7 +166,6 @@
         const winDetails = checkWinner();
         document.getElementById("message").textContent = `${currentPlayer} wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
-        updateScore(currentPlayer);
         isGameOver = true;
         return;
       } else if (isDraw()) {
@@ -202,7 +195,6 @@
         const winDetails = checkWinner();
         document.getElementById("message").textContent = `O wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
-        updateScore("O");
         isGameOver = true;
       } else if (isDraw()) {
         document.getElementById("message").textContent = "It's a draw!";
@@ -242,16 +234,6 @@
         boardElement[index].classList.add("highlight");
         boardElement[index].querySelector(".arrow").classList.add(direction);
       });
-    }
-
-    function updateScore(winner) {
-      if (winner === "X") {
-        playerScore++;
-        document.getElementById("playerScore").textContent = playerScore;
-      } else if (winner === "O") {
-        aiScore++;
-        document.getElementById("aiScore").textContent = aiScore;
-      }
     }
 
     function resetGame() {
