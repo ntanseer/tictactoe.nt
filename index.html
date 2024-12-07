@@ -63,17 +63,17 @@
     }
 
     .arrow.horizontal {
-      top: 50%;
-      left: 10%;
-      right: 10%;
+      width: 100%;
       height: 2px;
+      top: 50%;
+      left: 0;
     }
 
     .arrow.vertical {
-      left: 50%;
-      top: 10%;
-      bottom: 10%;
+      height: 100%;
       width: 2px;
+      left: 50%;
+      top: 0;
     }
 
     .arrow.diagonal-lr {
@@ -164,12 +164,14 @@
         return;
       }
 
-      currentPlayer = currentPlayer === "X" ? "O" : "X";
-      if (currentPlayer === "O") makeAIMove();
+      currentPlayer = "O";
       renderBoard();
+      makeAIMove();
     }
 
     function makeAIMove() {
+      if (isGameOver) return;
+
       let emptyCells = [];
       board.forEach((row, rowIndex) => {
         row.forEach((cell, colIndex) => {
@@ -178,12 +180,19 @@
       });
       const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
       board[row][col] = "O";
+
       if (checkWinner()) {
         const winDetails = checkWinner();
         document.getElementById("message").textContent = `O wins!`;
         highlightWinningCells(winDetails.cells, winDetails.direction);
         isGameOver = true;
+      } else if (isDraw()) {
+        document.getElementById("message").textContent = "It's a draw!";
+        isGameOver = true;
+      } else {
+        currentPlayer = "X";
       }
+      renderBoard();
     }
 
     function checkWinner() {
