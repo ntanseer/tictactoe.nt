@@ -10,32 +10,63 @@
       text-align: center;
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
     .board {
       display: grid;
-      grid-template-columns: repeat(3, 100px);
-      gap: 5px;
-      justify-content: center;
-      margin-top: 50px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 90%;
+      max-width: 300px;
+      aspect-ratio: 1;
+      margin-top: 20px;
     }
+
     .cell {
-      width: 100px;
-      height: 100px;
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
       font-weight: bold;
-      border: 1px solid black;
+      border: 2px solid black;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
+
     .cell.disabled {
       pointer-events: none;
       background-color: #f0f0f0;
     }
+
+    .cell:hover:not(.disabled) {
+      background-color: #eaeaea;
+    }
+
     .message {
       margin-top: 20px;
       font-size: 18px;
+    }
+
+    .highlight {
+      background-color: #aaf;
+    }
+
+    .reset-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .cell {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
@@ -43,6 +74,7 @@
   <h1>Tic Tac Toe</h1>
   <div class="board" id="board"></div>
   <div class="message" id="message"></div>
+  <button class="reset-btn" id="reset">Reset Game</button>
 
   <script>
     const board = [
@@ -52,6 +84,7 @@
     ];
 
     let currentPlayer = "X";
+    let isGameOver = false;
 
     function renderBoard() {
       const boardElement = document.getElementById("board");
@@ -72,84 +105,87 @@
     }
 
     function handleMove(row, col) {
-      if (board[row][col] !== "") return;
+      if (board[row][col] !== "" || isGameOver) return;
 
       board[row][col] = currentPlayer;
       if (checkWinner()) {
-        document.getElementById("message").textContent = `${currentPlayer} wins!`;
-        disableBoard();
+        document.getElementById("message").textContent = `${currentPlayer} wins (${checkWinner()})!`;
+        highlightWinningCells(checkWinnerCells());
+        isGameOver = true;
         return;
       } else if (isDraw()) {
         document.getElementById("message").textContent = "It's a draw!";
-        disableBoard();
+        isGameOver = true;
         return;
       }
 
       currentPlayer = currentPlayer === "X" ? "O" : "X";
-      if (currentPlayer === "O") {
-        setTimeout(aiMove, 500);
-      }
       renderBoard();
-    }
-
-    function aiMove() {
-      const emptyCells = [];
-      board.forEach((row, rowIndex) => {
-        row.forEach((cell, colIndex) => {
-          if (cell === "") {
-            emptyCells.push([rowIndex, colIndex]);
-          }
-        });
-      });
-
-      if (emptyCells.length > 0) {
-        const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-        board[row][col] = "O";
-
-        if (checkWinner()) {
-          document.getElementById("message").textContent = `O wins!`;
-          disableBoard();
-        } else if (isDraw()) {
-          document.getElementById("message").textContent = "It's a draw!";
-          disableBoard();
-        } else {
-          currentPlayer = "X";
-        }
-
-        renderBoard();
-      }
     }
 
     function checkWinner() {
       for (let i = 0; i < 3; i++) {
         if (board[i][0] && board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
-          return true;
+          return "Horizontal";
         }
         if (board[0][i] && board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
-          return true;
+          return "Vertical";
         }
       }
       if (board[0][0] && board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
-        return true;
+        return "Diagonal (\\)";
       }
       if (board[0][2] && board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
-        return true;
+        return "Diagonal (/";
       }
-      return false;
+      return null;
+    }
+
+    function checkWinnerCells() {
+      for (let i = 0; i < 3; i++) {
+        if (board[i][0] && board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
+          return [[i, 0], [i, 1], [i, 2]];
+        }
+        if (board[0][i] && board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
+          return [[0, i], [1, i], [2, i]];
+        }
+      }
+      if (board[0][0] && board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
+        return [[0, 0], [1, 1], [2, 2]];
+      }
+      if (board[0][2] && board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
+        return [[0, 2], [1, 1], [2, 0]];
+      }
+      return [];
     }
 
     function isDraw() {
       return board.flat().every((cell) => cell !== "");
     }
 
-    function disableBoard() {
-      document.querySelectorAll(".cell").forEach((cell) => {
-        cell.classList.add("disabled");
+    function highlightWinningCells(cells) {
+      const boardElement = document.getElementById("board").children;
+      cells.forEach(([row, col]) => {
+        const index = row * 3 + col;
+        boardElement[index].classList.add("highlight");
       });
     }
+
+    function resetGame() {
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          board[i][j] = "";
+        }
+      }
+      currentPlayer = "X";
+      isGameOver = false;
+      document.getElementById("message").textContent = "";
+      renderBoard();
+    }
+
+    document.getElementById("reset").addEventListener("click", resetGame);
 
     renderBoard();
   </script>
 </body>
 </html>
-
