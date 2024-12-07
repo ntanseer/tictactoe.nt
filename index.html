@@ -285,4 +285,12 @@
       currentPlayer = "X";
       isGameOver = false;
       document.getElementById("message").textContent = "";
-      render
+      renderBoard();
+    }
+
+    document.getElementById("reset").addEventListener("click", resetGame);
+
+    renderBoard();
+  </script>
+</body>
+</html>
